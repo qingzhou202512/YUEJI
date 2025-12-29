@@ -13,156 +13,144 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="悦己手账" />
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com" onload="initTailwindConfig()"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // 配置 Tailwind（在 CDN 加载后立即设置）
-      function initTailwindConfig() {
-        if (typeof tailwind === 'undefined') {
-          // 如果 tailwind 还没加载，等待一下
-          setTimeout(initTailwindConfig, 50);
-          return;
-        }
-        tailwind.config = {
-          theme: {
-            extend: {
-              colors: {
-                // Background: 温暖的奶油色（匹配 Gemini 设计）
-                cream: '#FDFBF7', // 更暖的奶油色
-                surface: '#FFFFFF',
-                
-                // Primary: Lavender / Soft Purple
-                primary: {
-                  50: '#F5F3FF',
-                  100: '#EDE9FE',
-                  200: '#DDD6FE',
-                  300: '#C4B5FD',
-                  400: '#A78BFA',
-                  500: '#8B5CF6',
-                  600: '#7C3AED',
-                },
-                
-                // Secondary: Soft Pink/Rose
-                pink: {
-                  50: '#FDF2F8',
-                  100: '#FCE7F3',
-                  200: '#FBCFE8',
-                  300: '#F9A8D4',
-                  400: '#F472B6',
-                },
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // Soft, "Youthful" Palette - Purple Theme
+              cream: '#FDFBF7', // Warmer cream
+              surface: '#FFFFFF',
+              
+              // Primary: Lavender / Soft Purple
+              primary: {
+                50: '#F5F3FF',
+                100: '#EDE9FE',
+                200: '#DDD6FE',
+                300: '#C4B5FD',
+                400: '#A78BFA',
+                500: '#8B5CF6',
+                600: '#7C3AED',
+              },
+              
+              // Secondary: Soft Pink/Rose (Complementary)
+              pink: {
+                50: '#FDF2F8',
+                100: '#FCE7F3',
+                200: '#FBCFE8',
+                300: '#F9A8D4',
+                400: '#F472B6',
+              },
 
-                // Soft Mint
-                mint: {
-                  50: '#F0FDFA',
-                  100: '#CCFBF1',
-                  200: '#99F6E4',
-                  500: '#14B8A6',
-                  600: '#0D9488',
-                },
-                
-                // Orange（用于火焰图标和高光时刻）
-                orange: {
-                  50: '#FFF7ED',
-                  100: '#FFEDD5',
-                  200: '#FED7AA',
-                  400: '#FB923C',
-                  500: '#F97316',
-                },
-                
-                // Red（用于高能量消耗）
-                red: {
-                  50: '#FEF2F2',
-                  100: '#FEE2E2',
-                  200: '#FECACA',
-                  500: '#EF4444',
-                  600: '#DC2626',
-                },
-                
-                // Indigo（用于 MIT 步骤）
-                indigo: {
-                  50: '#EEF2FF',
-                  100: '#E0E7FF',
-                  200: '#C7D2FE',
-                  300: '#A5B4FC',
-                  600: '#4F46E5',
-                },
-                
-                // Purple（用于明日步骤）
-                purple: {
-                  50: '#FAF5FF',
-                  100: '#F3E8FF',
-                  200: '#E9D5FF',
-                  300: '#D8B4FE',
-                  600: '#9333EA',
-                },
-                
-                // Green（用于已完成任务）
-                green: {
-                  50: '#F0FDF4',
-                  100: '#DCFCE7',
-                  200: '#BBF7D0',
-                  500: '#22C55E',
-                  600: '#16A34A',
-                },
-                
-                // Peach（用于能量消耗）
-                peach: {
-                  50: '#FFF5ED',
-                  100: '#FFE4D6',
-                  200: '#FFD4B8',
-                  500: '#FF8C69',
-                  600: '#FF6B3D',
-                },
-                
-                // Text
-                ink: {
-                  300: '#D1D5DB',
-                  400: '#9CA3AF',
-                  500: '#6B7280',
-                  600: '#4B5563',
-                  700: '#374151',
-                  800: '#1F2937',
-                  900: '#111827',
-                }
+              // Soft Mint
+              mint: {
+                50: '#F0FDFA',
+                100: '#CCFBF1',
+                200: '#99F6E4',
+                400: '#2DD4BF',
+                500: '#14B8A6',
+                600: '#0D9488',
               },
-              fontFamily: {
-                sans: ['"Nunito"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                serif: ['"Noto Serif SC"', '"Songti SC"', 'serif'],
+              
+              // Orange（用于火焰图标和高光时刻）
+              orange: {
+                50: '#FFF7ED',
+                100: '#FFEDD5',
+                200: '#FED7AA',
+                400: '#FB923C',
+                500: '#F97316',
               },
-              boxShadow: {
-                'soft': '0 10px 40px -10px rgba(139, 92, 246, 0.1)',
-                'card': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
-                'glow': '0 0 25px rgba(167, 139, 250, 0.4)',
+              
+              // Red（用于高能量消耗）
+              red: {
+                50: '#FEF2F2',
+                100: '#FEE2E2',
+                200: '#FECACA',
+                500: '#EF4444',
+                600: '#DC2626',
               },
-              animation: {
-                'breathe': 'breathe 8s ease-in-out infinite',
-                'float': 'float 6s ease-in-out infinite',
-                'fade-in': 'fadeIn 1s ease-out forwards',
+              
+              // Indigo（用于 MIT 步骤）
+              indigo: {
+                50: '#EEF2FF',
+                100: '#E0E7FF',
+                200: '#C7D2FE',
+                300: '#A5B4FC',
+                400: '#818CF8',
+                600: '#4F46E5',
               },
-              keyframes: {
-                breathe: {
-                  '0%, 100%': { transform: 'scale(1)', opacity: '0.4' },
-                  '50%': { transform: 'scale(1.05)', opacity: '0.6' },
-                },
-                float: {
-                  '0%, 100%': { transform: 'translateY(0)' },
-                  '50%': { transform: 'translateY(-10px)' },
-                },
-                fadeIn: {
-                  '0%': { opacity: '0', transform: 'translateY(20px)' },
-                  '100%': { opacity: '1', transform: 'translateY(0)' },
-                }
+              
+              // Purple（用于明日步骤）
+              purple: {
+                50: '#FAF5FF',
+                100: '#F3E8FF',
+                200: '#E9D5FF',
+                300: '#D8B4FE',
+                600: '#9333EA',
+                900: '#581C87',
+              },
+              
+              // Green（用于已完成任务）
+              green: {
+                50: '#F0FDF4',
+                100: '#DCFCE7',
+                200: '#BBF7D0',
+                500: '#22C55E',
+                600: '#16A34A',
+              },
+              
+              // Peach（用于能量消耗）
+              peach: {
+                50: '#FFF5ED',
+                100: '#FFE4D6',
+                200: '#FFD4B8',
+                500: '#FF8C69',
+                600: '#FF6B3D',
+              },
+              
+              // Text
+              ink: {
+                300: '#D1D5DB',
+                400: '#9CA3AF',
+                500: '#6B7280',
+                600: '#4B5563',
+                700: '#374151',
+                800: '#1F2937',
+                900: '#111827',
               }
             },
+            fontFamily: {
+              sans: ['"Nunito"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+              serif: ['"Noto Serif SC"', '"Songti SC"', 'serif'],
+            },
+            boxShadow: {
+              'soft': '0 10px 40px -10px rgba(139, 92, 246, 0.1)',
+              'card': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
+              'glow': '0 0 25px rgba(167, 139, 250, 0.4)',
+            },
+            animation: {
+              'breathe': 'breathe 8s ease-in-out infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'fade-in': 'fadeIn 1s ease-out forwards',
+            },
+            keyframes: {
+              breathe: {
+                '0%, 100%': { transform: 'scale(1)', opacity: '0.4' },
+                '50%': { transform: 'scale(1.05)', opacity: '0.6' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
           },
-        };
-        console.log('[Tailwind] 配置已应用');
+        },
       }
-      // 备用方案：如果 onload 事件没有触发，在页面加载完成后尝试
-      window.addEventListener('load', function() {
-        if (typeof tailwind !== 'undefined' && !tailwind.config) {
-          initTailwindConfig();
-        }
-      });
     </script>
     <!-- Fonts: Nunito (Rounded Sans) & Noto Serif SC -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
