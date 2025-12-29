@@ -1,0 +1,39 @@
+{
+  "name": "悦己手账",
+  "short_name": "悦己手账",
+  "description": "一个温暖的日常记录应用，帮助你记录生活中的小确幸、高光时刻，并进行能量管理和目标追踪",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFBF7",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "health", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "开始记录",
+      "short_name": "记录",
+      "description": "快速开始今天的记录",
+      "url": "/?action=journal",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+
+
+
