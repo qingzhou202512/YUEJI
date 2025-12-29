@@ -1,10 +1,20 @@
 /**
- * 认证服务
- * 处理用户登录、注册、登出等操作
+ * 认证服务（可选能力）
+ * 
+ * ⚠️ 注意：此服务不再是应用初始化的必需部分
+ * - 应用启动不再依赖 Supabase auth
+ * - 所有数据读写统一使用 userId（从 services/userId.ts 获取）
+ * - 此服务仅作为可选的账号绑定功能
+ * 
+ * 使用场景：
+ * - 用户想要绑定手机号/邮箱
+ * - 需要跨设备同步（需要 Supabase auth）
+ * - 需要账号恢复功能
  */
 
 import { supabase, isSupabaseAvailable } from './supabaseClient';
 import { syncLocalToSupabase } from './syncService';
+import { getOrCreateUserId } from './userId';
 
 /**
  * 匿名登录初始化（生产级实现）
@@ -91,8 +101,10 @@ export const initAnonymousAuth = async (): Promise<any> => {
         console.log('[Auth] 匿名登录成功，用户 ID:', data.user.id);
         
         // 匿名登录成功后，同步本地数据到 Supabase
+        // 注意：使用本地 userId 而不是 auth user.id（保持数据一致性）
         try {
-          const syncResult = await syncLocalToSupabase();
+          const localUserId = getOrCreateUserId();
+          const syncResult = await syncLocalToSupabase(localUserId);
           console.log('[Auth] 数据同步完成:', syncResult);
         } catch (error) {
           console.warn('[Auth] 数据同步失败:', error);
@@ -132,7 +144,8 @@ export const signIn = async (email: string, password: string) => {
   // 登录成功后，同步本地数据到 Supabase
   if (data.user) {
     try {
-      const syncResult = await syncLocalToSupabase();
+      const localUserId = getOrCreateUserId();
+      const syncResult = await syncLocalToSupabase(localUserId);
       console.log('[Auth] 数据同步完成:', syncResult);
     } catch (error) {
       console.warn('[Auth] 数据同步失败:', error);
@@ -212,14 +225,20 @@ export const getSession = async () => {
 };
 
 /**
- * 初始化认证（应用启动时调用，只调用一次）
+ * 初始化认证（可选功能，不再在应用启动时自动调用）
  * 
- * 使用生产级的匿名登录逻辑：
- * - 防止重复创建
- * - 会话复用
- * - 防并发
+ * ⚠️ 注意：此函数已废弃，不再作为应用初始化的必需步骤
+ * - 应用启动不再依赖此函数
+ * - 如需使用 Supabase auth，请手动调用 initAnonymousAuth() 或其他登录函数
+ * 
+ * 使用场景：
+ * - 用户主动选择绑定账号
+ * - 需要跨设备同步时
  */
 export const initializeAuth = async (): Promise<void> => {
+  console.warn('[Auth] initializeAuth() 已废弃，应用不再依赖 Supabase auth 初始化');
+  console.warn('[Auth] 如需使用 auth 功能，请手动调用 initAnonymousAuth() 或其他登录函数');
+  
   if (!isSupabaseAvailable()) {
     console.log('[Auth] Supabase 未配置，使用本地存储模式');
     return;

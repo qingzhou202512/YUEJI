@@ -7,7 +7,7 @@ interface HeaderProps {
   recordedDays: number;
 }
 
-export const Header: React.FC<HeaderProps> = React.memo(({ onNavigate, recordedDays }) => {
+const HeaderComponent: React.FC<HeaderProps> = ({ onNavigate, recordedDays }) => {
   const date = new Date();
   const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const dayName = weekDays[date.getDay()];
@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ onNavigate, recordedD
 
         <button 
           onClick={() => onNavigate(ViewState.HISTORY)}
-          className="flex flex-col items-end bg-white/60 backdrop-blur-md rounded-2xl p-2 pl-3 border border-white/60 shadow-sm active:scale-95 transition-transform group"
+          className="flex flex-col items-end bg-white/70 backdrop-blur-md rounded-2xl p-2 pl-3 border border-white/70 shadow-sm active:scale-95 transition-transform group"
         >
           <div className="flex items-center gap-1.5 mb-1">
             <div className="bg-orange-100 p-1 rounded-full">
@@ -63,14 +63,19 @@ export const Header: React.FC<HeaderProps> = React.memo(({ onNavigate, recordedD
         </button>
       </div>
 
-      <div className="mt-4 relative pl-3 border-l-2 border-primary-200">
+      <div className="mt-4 relative pl-3 border-l-2 border-primary-400">
         <p className="text-sm text-ink-700 font-serif leading-relaxed italic pr-4">
           "{dailyQuote}"
         </p>
       </div>
     </header>
   );
-});
+};
+
+HeaderComponent.displayName = 'Header';
+
+export const Header = React.memo(HeaderComponent);
+
 
 
 

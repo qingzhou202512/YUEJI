@@ -10,7 +10,7 @@
 
 import { JournalEntry } from '../types';
 import { JournalEntryRow, JournalItemRow, JournalEntryInsert, JournalItemInsert } from '../database/types';
-import { supabase, isSupabaseAvailable, getCurrentUser } from './supabaseClient';
+import { supabase, isSupabaseAvailable } from './supabaseClient';
 import { saveEntry as saveToLocalStorage, getEntries as getFromLocalStorage } from './storage';
 
 // ============================================
@@ -118,8 +118,11 @@ export function convertFromDatabaseFormat(
 /**
  * 保存记录到 Supabase
  * 同时保存到 localStorage（作为备份）
+ * 
+ * @param entry 要保存的记录
+ * @param userId 用户 ID（从 getOrCreateUserId() 获取）
  */
-export async function saveEntryToSupabase(entry: JournalEntry): Promise<{ success: boolean; error?: string }> {
+export async function saveEntryToSupabase(entry: JournalEntry, userId: string): Promise<{ success: boolean; error?: string }> {
   // 1. 先保存到 localStorage（离线备份）
   saveToLocalStorage(entry);
 
@@ -128,16 +131,9 @@ export async function saveEntryToSupabase(entry: JournalEntry): Promise<{ succes
     return { success: true }; // 已保存到 localStorage
   }
 
-  // 3. 获取当前用户
-  const user = await getCurrentUser();
-  if (!user) {
-    // 用户未登录，只保存到 localStorage
-    return { success: true };
-  }
-
   try {
-    // 4. 转换数据格式
-    const { entry: entryData, items } = convertToDatabaseFormat(entry, user.id);
+    // 3. 转换数据格式（使用传入的 userId）
+    const { entry: entryData, items } = convertToDatabaseFormat(entry, userId);
     const dateOnly = entry.date.split('T')[0];
 
     // 5. 使用 upsert 插入或更新核心表
@@ -191,19 +187,13 @@ export async function saveEntryToSupabase(entry: JournalEntry): Promise<{ succes
 
 /**
  * 从 Supabase 获取某天的记录
+ * 
+ * @param date 日期
+ * @param userId 用户 ID（从 getOrCreateUserId() 获取）
  */
-export async function getEntryFromSupabase(date: Date): Promise<JournalEntry | null> {
+export async function getEntryFromSupabase(date: Date, userId: string): Promise<JournalEntry | null> {
   if (!isSupabaseAvailable()) {
     // 降级到 localStorage
-    const localEntries = getFromLocalStorage();
-    const dateStr = date.toISOString().split('T')[0];
-    const entry = localEntries.find(e => e.date.startsWith(dateStr));
-    return entry || null;
-  }
-
-  const user = await getCurrentUser();
-  if (!user) {
-    // 用户未登录，使用 localStorage
     const localEntries = getFromLocalStorage();
     const dateStr = date.toISOString().split('T')[0];
     const entry = localEntries.find(e => e.date.startsWith(dateStr));
@@ -213,11 +203,11 @@ export async function getEntryFromSupabase(date: Date): Promise<JournalEntry | n
   try {
     const dateOnly = date.toISOString().split('T')[0];
 
-    // 获取核心记录
+    // 获取核心记录（使用传入的 userId）
     const { data: entryRow, error: entryError } = await supabase
       .from('journal_entries')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('date', dateOnly)
       .single();
 
@@ -247,25 +237,21 @@ export async function getEntryFromSupabase(date: Date): Promise<JournalEntry | n
 
 /**
  * 从 Supabase 获取所有记录
+ * 
+ * @param userId 用户 ID（从 getOrCreateUserId() 获取）
  */
-export async function getAllEntriesFromSupabase(): Promise<JournalEntry[]> {
+export async function getAllEntriesFromSupabase(userId: string): Promise<JournalEntry[]> {
   if (!isSupabaseAvailable()) {
     // 降级到 localStorage
     return getFromLocalStorage();
   }
 
-  const user = await getCurrentUser();
-  if (!user) {
-    // 用户未登录，使用 localStorage
-    return getFromLocalStorage();
-  }
-
   try {
-    // 获取所有核心记录
+    // 获取所有核心记录（使用传入的 userId）
     const { data: entries, error: entriesError } = await supabase
       .from('journal_entries')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('date', { ascending: false });
 
     if (entriesError) {
@@ -313,8 +299,10 @@ export async function getAllEntriesFromSupabase(): Promise<JournalEntry[]> {
 /**
  * 同步本地数据到 Supabase
  * 用于首次登录或数据迁移
+ * 
+ * @param userId 用户 ID（从 getOrCreateUserId() 获取）
  */
-export async function syncLocalToSupabase(): Promise<{ success: number; failed: number; errors: string[] }> {
+export async function syncLocalToSupabase(userId: string): Promise<{ success: number; failed: number; errors: string[] }> {
   const localEntries = getFromLocalStorage();
   
   if (localEntries.length === 0) {
@@ -325,16 +313,11 @@ export async function syncLocalToSupabase(): Promise<{ success: number; failed: 
     return { success: 0, failed: localEntries.length, errors: ['Supabase 未配置'] };
   }
 
-  const user = await getCurrentUser();
-  if (!user) {
-    return { success: 0, failed: localEntries.length, errors: ['用户未登录'] };
-  }
-
   const errors: string[] = [];
   let successCount = 0;
 
   for (const entry of localEntries) {
-    const result = await saveEntryToSupabase(entry);
+    const result = await saveEntryToSupabase(entry, userId);
     if (result.success) {
       successCount++;
     } else {

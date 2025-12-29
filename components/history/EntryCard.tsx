@@ -62,3 +62,4 @@ export const EntryCard: React.FC<EntryCardProps> = ({ entry }) => {
 
 
 
+

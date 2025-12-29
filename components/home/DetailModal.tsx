@@ -72,3 +72,4 @@ export const DetailModal: React.FC<DetailModalProps> = ({ moment, onClose }) => 
 
 
 
+

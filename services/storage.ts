@@ -6,7 +6,8 @@
 
 import { JournalEntry } from '../types';
 import { saveEntryToSupabase, getEntryFromSupabase, getAllEntriesFromSupabase } from './syncService';
-import { isSupabaseAvailable, isAuthenticated } from './supabaseClient';
+import { isSupabaseAvailable } from './supabaseClient';
+import { getOrCreateUserId } from './userId';
 
 const STORAGE_KEY = 'innerflow_entries';
 
@@ -58,16 +59,14 @@ export const saveEntry = (entry: JournalEntry): void => {
 
   // 2. 后台异步同步到 Supabase（不阻塞 UI）
   if (isSupabaseAvailable()) {
-    isAuthenticated().then(authenticated => {
-      if (authenticated) {
-        saveEntryToSupabase(entry).then(result => {
-          if (!result.success) {
-            console.warn('[Storage] 同步到 Supabase 失败，但已保存到本地:', result.error);
-          }
-        }).catch(error => {
-          console.warn('[Storage] 同步到 Supabase 出错:', error);
-        });
+    // 获取用户 ID（不依赖 auth）
+    const userId = getOrCreateUserId();
+    saveEntryToSupabase(entry, userId).then(result => {
+      if (!result.success) {
+        console.warn('[Storage] 同步到 Supabase 失败，但已保存到本地:', result.error);
       }
+    }).catch(error => {
+      console.warn('[Storage] 同步到 Supabase 出错:', error);
     });
   }
 };
@@ -82,17 +81,14 @@ export const getEntries = (): JournalEntry[] => {
   
   // 后台异步同步 Supabase（如果可用）
   if (isSupabaseAvailable()) {
-    isAuthenticated().then(authenticated => {
-      if (authenticated) {
-        getAllEntriesFromSupabase().then(entries => {
-          // 更新 localStorage 缓存
-          if (entries.length > 0) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-          }
-        }).catch(error => {
-          console.warn('[Storage] 后台同步失败:', error);
-        });
+    const userId = getOrCreateUserId();
+    getAllEntriesFromSupabase(userId).then(entries => {
+      // 更新 localStorage 缓存
+      if (entries.length > 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
       }
+    }).catch(error => {
+      console.warn('[Storage] 后台同步失败:', error);
     });
   }
   
@@ -126,16 +122,13 @@ export const getTodayEntry = (): JournalEntry | undefined => {
   
   // 后台异步同步 Supabase（如果可用）
   if (isSupabaseAvailable() && !entry) {
-    isAuthenticated().then(authenticated => {
-      if (authenticated) {
-        getEntryFromSupabase(today).then(supabaseEntry => {
-          if (supabaseEntry) {
-            saveToLocalStorage(supabaseEntry);
-          }
-        }).catch(error => {
-          console.warn('[Storage] 后台同步今天记录失败:', error);
-        });
+    const userId = getOrCreateUserId();
+    getEntryFromSupabase(today, userId).then(supabaseEntry => {
+      if (supabaseEntry) {
+        saveToLocalStorage(supabaseEntry);
       }
+    }).catch(error => {
+      console.warn('[Storage] 后台同步今天记录失败:', error);
     });
   }
   

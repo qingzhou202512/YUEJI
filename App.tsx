@@ -10,7 +10,7 @@ import { InstallPrompt } from './components/ui/InstallPrompt';
 import { OfflineIndicator } from './components/ui/OfflineIndicator';
 import { TestDataGenerator } from './components/ui/TestDataGenerator';
 import { setupInstallPrompt } from './services/pwaService';
-import { initializeAuth } from './services/authService';
+import { getOrCreateUserId } from './services/userId';
 // 导入测试数据生成工具（会在浏览器控制台暴露 window.generateTestData）
 import './services/testDataGenerator';
 
@@ -21,23 +21,31 @@ export default function App() {
 
   useEffect(() => {
     // 初始化应用
-    const initApp = async () => {
-      // 1. 初始化认证（自动匿名登录）
-      await initializeAuth();
-      
-      // 2. 生成模拟数据（如果本地没有数据）
-      generateMockData();
-      
-      // 3. 检查今天的记录
-      checkEntry();
-      
-      // 4. 初始化 PWA 安装提示
-      setupInstallPrompt(() => {
-        // 当应用可安装时，可以在这里做一些处理
-        // InstallPrompt 组件会自动显示
-      });
-      
-      setIsInitializing(false);
+    const initApp = () => {
+      try {
+        // 1. 获取或创建用户 ID（这是初始化完成的唯一条件）
+        const userId = getOrCreateUserId();
+        console.log('[App] 初始化完成，用户 ID:', userId);
+        
+        // 2. 生成模拟数据（如果本地没有数据）
+        generateMockData();
+        
+        // 3. 检查今天的记录
+        checkEntry();
+        
+        // 4. 初始化 PWA 安装提示
+        setupInstallPrompt(() => {
+          // 当应用可安装时，可以在这里做一些处理
+          // InstallPrompt 组件会自动显示
+        });
+        
+        // 5. 标记初始化完成
+        setIsInitializing(false);
+      } catch (error) {
+        console.error('[App] 初始化失败:', error);
+        // 即使出错也继续运行，避免卡在加载状态
+        setIsInitializing(false);
+      }
     };
 
     initApp();

@@ -9,8 +9,9 @@
 
 import { JournalEntry } from '../types';
 import { saveEntry } from './storage';
-import { saveEntryToSupabase, syncLocalToSupabase } from './syncService';
-import { supabase, isSupabaseAvailable, getCurrentUser } from './supabaseClient';
+import { saveEntryToSupabase } from './syncService';
+import { supabase, isSupabaseAvailable } from './supabaseClient';
+import { getOrCreateUserId } from './userId';
 import { MeditationSessionInsert, AIInsightInsert } from '../database/types';
 
 // ============================================
@@ -198,23 +199,24 @@ export async function generateTestData(options: {
   } = options;
 
   try {
-    // 1. 清除现有数据（如果需要）
+    // 1. 获取用户 ID（不依赖 auth）
+    const userId = getOrCreateUserId();
+    console.log('[TestData] 使用用户 ID:', userId);
+
+    // 2. 清除现有数据（如果需要）
     if (clearExisting) {
       console.log('[TestData] 清除现有数据...');
       localStorage.removeItem('innerflow_entries');
       
       if (isSupabaseAvailable()) {
-        const user = await getCurrentUser();
-        if (user) {
-          // 删除 Supabase 中的数据
-          await supabase.from('journal_entries').delete().eq('user_id', user.id);
-          await supabase.from('meditation_sessions').delete().eq('user_id', user.id);
-          await supabase.from('ai_insights').delete().eq('user_id', user.id);
-        }
+        // 删除 Supabase 中的数据（使用 userId）
+        await supabase.from('journal_entries').delete().eq('user_id', userId);
+        await supabase.from('meditation_sessions').delete().eq('user_id', userId);
+        await supabase.from('ai_insights').delete().eq('user_id', userId);
       }
     }
 
-    // 2. 生成日记记录
+    // 3. 生成日记记录
     console.log(`[TestData] 生成 ${journalDays} 天的日记记录...`);
     const journalEntries: JournalEntry[] = [];
     
@@ -223,80 +225,70 @@ export async function generateTestData(options: {
       if (Math.random() > 0.3) {
         const entry = generateJournalEntry(i);
         journalEntries.push(entry);
-        // 保存到 localStorage
+        // 保存到 localStorage（会自动同步到 Supabase）
         saveEntry(entry);
       }
     }
 
-    // 3. 如果 Supabase 可用，同步到 Supabase
+    // 4. 如果 Supabase 可用，生成额外的数据（冥想记录和 AI 洞察）
     let meditationCount = 0;
     let aiInsightCount = 0;
     
     if (isSupabaseAvailable()) {
-      const user = await getCurrentUser();
-      
-      if (user) {
-        console.log('[TestData] 同步日记记录到 Supabase...');
-        // 同步日记记录
-        for (const entry of journalEntries) {
-          await saveEntryToSupabase(entry);
-        }
+      console.log('[TestData] Supabase 可用，生成额外数据...');
 
-        // 4. 生成冥想记录
-        if (meditationDays > 0) {
-          console.log(`[TestData] 生成 ${meditationDays} 天的冥想记录...`);
-          const meditationSessions: MeditationSessionInsert[] = [];
-          
-          for (let i = 0; i < meditationDays; i++) {
-            // 60% 的概率生成冥想记录
-            if (Math.random() > 0.4) {
-              const session = generateMeditationSession(user.id, i);
-              meditationSessions.push(session);
-            }
-          }
-
-          if (meditationSessions.length > 0) {
-            const { error } = await supabase
-              .from('meditation_sessions')
-              .insert(meditationSessions);
-            
-            if (error) {
-              console.error('[TestData] 插入冥想记录失败:', error);
-            } else {
-              meditationCount = meditationSessions.length;
-            }
+      // 5. 生成冥想记录
+      if (meditationDays > 0) {
+        console.log(`[TestData] 生成 ${meditationDays} 天的冥想记录...`);
+        const meditationSessions: MeditationSessionInsert[] = [];
+        
+        for (let i = 0; i < meditationDays; i++) {
+          // 60% 的概率生成冥想记录
+          if (Math.random() > 0.4) {
+            const session = generateMeditationSession(userId, i);
+            meditationSessions.push(session);
           }
         }
 
-        // 5. 生成 AI 洞察
-        if (aiInsights) {
-          console.log('[TestData] 生成 AI 洞察...');
-          const insights: AIInsightInsert[] = [];
+        if (meditationSessions.length > 0) {
+          const { error } = await supabase
+            .from('meditation_sessions')
+            .insert(meditationSessions);
           
-          // 生成每周和每月的洞察
-          const categories: Array<'mood' | 'interest' | 'ability' | 'habit'> = ['mood', 'interest', 'ability', 'habit'];
-          
-          for (const category of categories) {
-            // 每周洞察
-            insights.push(generateAIInsight(user.id, category, 'weekly'));
-            // 每月洞察
-            insights.push(generateAIInsight(user.id, category, 'monthly'));
-          }
-
-          if (insights.length > 0) {
-            const { error } = await supabase
-              .from('ai_insights')
-              .insert(insights);
-            
-            if (error) {
-              console.error('[TestData] 插入 AI 洞察失败:', error);
-            } else {
-              aiInsightCount = insights.length;
-            }
+          if (error) {
+            console.error('[TestData] 插入冥想记录失败:', error);
+          } else {
+            meditationCount = meditationSessions.length;
           }
         }
-      } else {
-        console.warn('[TestData] 用户未登录，只生成 localStorage 数据');
+      }
+
+      // 6. 生成 AI 洞察
+      if (aiInsights) {
+        console.log('[TestData] 生成 AI 洞察...');
+        const insights: AIInsightInsert[] = [];
+        
+        // 生成每周和每月的洞察
+        const categories: Array<'mood' | 'interest' | 'ability' | 'habit'> = ['mood', 'interest', 'ability', 'habit'];
+        
+        for (const category of categories) {
+          // 每周洞察
+          insights.push(generateAIInsight(userId, category, 'weekly'));
+          // 每月洞察
+          insights.push(generateAIInsight(userId, category, 'monthly'));
+        }
+
+        if (insights.length > 0) {
+          const { error } = await supabase
+            .from('ai_insights')
+            .insert(insights);
+          
+          if (error) {
+            console.error('[TestData] 插入 AI 洞察失败:', error);
+          } else {
+            aiInsightCount = insights.length;
+          }
+        }
       }
     } else {
       console.warn('[TestData] Supabase 未配置，只生成 localStorage 数据');
@@ -365,4 +357,5 @@ if (typeof window !== 'undefined') {
    window.generateTestData({ clearExisting: true })
   `);
 }
+
 
