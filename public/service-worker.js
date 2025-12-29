@@ -64,6 +64,19 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
+  // 不拦截外部 CDN 请求（Tailwind、字体、图标等）
+  const externalDomains = [
+    'cdn.tailwindcss.com',
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'unpkg.com',
+    'esm.sh'
+  ];
+  
+  if (externalDomains.some(domain => url.hostname.includes(domain))) {
+    return; // 直接使用浏览器默认行为
+  }
+  
   // 只处理同源请求
   if (url.origin !== location.origin) {
     return;
@@ -71,8 +84,17 @@ self.addEventListener('fetch', (event) => {
   
   // 策略：网络优先，失败时使用缓存
   // 这样可以确保用户总是看到最新内容，离线时也能查看记录
+  const fetchWithTimeout = (request, timeout = 15000) => {
+    return Promise.race([
+      fetch(request),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('请求超时')), timeout)
+      )
+    ]);
+  };
+  
   event.respondWith(
-    fetch(request)
+    fetchWithTimeout(request)
       .then((response) => {
         // 网络请求成功，更新缓存
         if (response && response.status === 200) {
@@ -83,14 +105,17 @@ self.addEventListener('fetch', (event) => {
                 (request.destination === 'document' || 
                  request.destination === 'script' || 
                  request.destination === 'style')) {
-              cache.put(request, responseToCache);
+              cache.put(request, responseToCache).catch(err => {
+                console.warn('[Service Worker] 缓存失败:', err);
+              });
             }
           });
         }
         return response;
       })
-      .catch(() => {
-        // 网络请求失败，尝试从缓存获取
+      .catch((error) => {
+        // 网络请求失败（超时或网络错误），尝试从缓存获取
+        console.log('[Service Worker] 网络请求失败，使用缓存:', error.message);
         return caches.match(request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;

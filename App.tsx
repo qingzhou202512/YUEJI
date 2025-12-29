@@ -8,47 +8,21 @@ import { Book, Brain, Plus, PenLine } from 'lucide-react';
 import { getTodayEntry, getYesterdayEntry, generateMockData } from './services/storage';
 import { InstallPrompt } from './components/ui/InstallPrompt';
 import { OfflineIndicator } from './components/ui/OfflineIndicator';
-import { TestDataGenerator } from './components/ui/TestDataGenerator';
 import { setupInstallPrompt } from './services/pwaService';
-import { getOrCreateUserId } from './services/userId';
-// 导入测试数据生成工具（会在浏览器控制台暴露 window.generateTestData）
-import './services/testDataGenerator';
 
 export default function App() {
   const [view, setView] = useState<ViewState>(ViewState.HOME);
   const [hasTodayEntry, setHasTodayEntry] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
 
+  // 初始化数据
   useEffect(() => {
-    // 初始化应用
-    const initApp = () => {
-      try {
-        // 1. 获取或创建用户 ID（这是初始化完成的唯一条件）
-        const userId = getOrCreateUserId();
-        console.log('[App] 初始化完成，用户 ID:', userId);
-        
-        // 2. 生成模拟数据（如果本地没有数据）
-        generateMockData();
-        
-        // 3. 检查今天的记录
-        checkEntry();
-        
-        // 4. 初始化 PWA 安装提示
-        setupInstallPrompt(() => {
-          // 当应用可安装时，可以在这里做一些处理
-          // InstallPrompt 组件会自动显示
-        });
-        
-        // 5. 标记初始化完成
-        setIsInitializing(false);
-      } catch (error) {
-        console.error('[App] 初始化失败:', error);
-        // 即使出错也继续运行，避免卡在加载状态
-        setIsInitializing(false);
-      }
-    };
-
-    initApp();
+    generateMockData();
+    checkEntry();
+    
+    // 初始化 PWA 安装提示
+    setupInstallPrompt(() => {
+      // InstallPrompt 组件会自动显示
+    });
   }, []);
 
   const checkEntry = () => {
@@ -81,19 +55,8 @@ export default function App() {
     }
   };
 
-  // 初始化中显示加载状态
-  if (isInitializing) {
-    return (
-      <div className="h-screen w-full bg-cream flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center animate-pulse">
-            <Book size={32} className="text-primary-600" />
-          </div>
-          <p className="text-ink-500 text-sm font-medium">正在初始化...</p>
-        </div>
-      </div>
-    );
-  }
+  // 只在非 Journal 页面显示导航栏
+  const showNav = view !== ViewState.JOURNAL;
 
   return (
     <div className="h-screen w-full bg-cream flex flex-col font-sans text-ink-900 selection:bg-primary-200 overflow-hidden">
@@ -101,16 +64,14 @@ export default function App() {
       <OfflineIndicator />
       <InstallPrompt />
       
-      {/* 测试数据生成工具（仅开发环境） */}
-      <TestDataGenerator />
-      
       <main className="flex-1 overflow-hidden relative z-0">
         {renderContent()}
       </main>
 
-      {/* Bottom Navigation */}
-      <div className="absolute bottom-8 left-0 w-full px-8 z-50 pointer-events-none">
-        <nav className="h-20 bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-soft flex items-center justify-between px-10 pointer-events-auto border border-white/50 relative">
+      {/* Bottom Navigation - Hidden when recording */}
+      {showNav && (
+        <div className="absolute bottom-8 left-0 w-full px-8 z-50 pointer-events-none animate-fade-in">
+          <nav className="h-20 bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-soft flex items-center justify-between px-10 pointer-events-auto border border-white/50 relative">
           <NavItem 
             icon={view === ViewState.HOME ? <Book size={24} fill="currentColor" /> : <Book size={24} />} 
             label="记录" 

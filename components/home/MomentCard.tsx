@@ -20,7 +20,7 @@ export const MomentCard: React.FC<MomentCardProps> = ({ moment, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className="w-full bg-white/95 backdrop-blur-sm rounded-[2rem] p-5 shadow-card border border-white/60 flex items-start gap-4 cursor-pointer active:scale-[0.98] transition-transform"
+      className="w-full bg-white/80 backdrop-blur-sm rounded-[2rem] p-5 shadow-card border border-white/50 flex items-start gap-4 cursor-pointer active:scale-[0.98] transition-transform"
     >
       <div className={`p-3 rounded-2xl shrink-0 ${moment.bgColor} ${moment.color}`}>
         <moment.icon size={20} />

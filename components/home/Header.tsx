@@ -12,7 +12,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({ onNavigate, recordedDays }) =>
   const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const dayName = weekDays[date.getDay()];
   const dayNum = date.getDate();
-  const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+  const monthName = date.toLocaleDateString('en-US', { month: 'short' });
 
   const quotes = [
     "今天也要好好爱自己",
@@ -30,43 +30,33 @@ const HeaderComponent: React.FC<HeaderProps> = ({ onNavigate, recordedDays }) =>
   const dailyQuote = quotes[quoteIndex];
 
   return (
-    <header className="px-6 pt-10 pb-2 relative z-10 animate-fade-in">
-      <div className="flex justify-between items-start">
-        <div className="flex flex-col pt-1">
-          <span className="text-xs font-bold text-ink-400 uppercase tracking-widest mb-0.5">
-            {monthName} {date.getFullYear()}
+    <header className="px-6 pt-8 pb-1 relative z-10 animate-fade-in">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <span className="text-4xl font-light text-ink-900 tracking-tighter leading-none font-serif">
+            {dayNum}
           </span>
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-light text-ink-900 tracking-tighter leading-none font-serif">
-              {dayNum}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-ink-400 uppercase tracking-widest leading-none mb-1">
+              {monthName} {dayName}
             </span>
-            <span className="text-base font-medium text-ink-600">
-              {dayName}
-            </span>
+            <p className="text-xs text-ink-700 font-serif leading-none italic pr-4">
+              "{dailyQuote}"
+            </p>
           </div>
         </div>
 
         <button 
           onClick={() => onNavigate(ViewState.HISTORY)}
-          className="flex flex-col items-end bg-white/70 backdrop-blur-md rounded-2xl p-2 pl-3 border border-white/70 shadow-sm active:scale-95 transition-transform group"
+          className="flex items-center gap-2 bg-white/60 backdrop-blur-md rounded-xl p-1.5 pl-2.5 border border-white/60 shadow-sm active:scale-95 transition-transform group"
         >
-          <div className="flex items-center gap-1.5 mb-1">
-            <div className="bg-orange-100 p-1 rounded-full">
-              <Flame size={12} className="text-orange-500 fill-orange-500" />
-            </div>
-            <span className="text-xs font-bold text-ink-900">坚持 {recordedDays} 天</span>
+          <div className="flex items-center gap-1">
+            <Flame size={10} className="text-orange-500 fill-orange-500" />
+            <span className="text-[11px] font-bold text-ink-900">{recordedDays} 天</span>
           </div>
-          <div className="flex items-center gap-1 text-ink-400 group-hover:text-primary-500 transition-colors">
-            <span className="text-[10px] font-medium">查看足迹</span>
-            <ChevronRight size={10} />
-          </div>
+          <div className="w-px h-3 bg-ink-200"></div>
+          <ChevronRight size={12} className="text-ink-400 group-hover:text-primary-500" />
         </button>
-      </div>
-
-      <div className="mt-4 relative pl-3 border-l-2 border-primary-400">
-        <p className="text-sm text-ink-700 font-serif leading-relaxed italic pr-4">
-          "{dailyQuote}"
-        </p>
       </div>
     </header>
   );

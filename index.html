@@ -12,146 +12,166 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="悦己手账" />
-    <!-- Tailwind CSS CDN with inline config -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com" onload="initTailwindConfig()"></script>
     <script>
-      // 配置 Tailwind（必须在 CDN 加载后立即设置）
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              // Background: 非常浅的白色（匹配设计图）
-              cream: '#FEFEFE', // 几乎纯白，比 #FDFBF7 更白
-              surface: '#FFFFFF',
-              
-              // Primary: Lavender / Soft Purple（用于竖线、图标、FAB 渐变）
-              primary: {
-                50: '#F5F3FF',
-                100: '#EDE9FE',
-                200: '#DDD6FE', // 用于竖线边框
-                300: '#C4B5FD',
-                400: '#A78BFA',
-                500: '#8B5CF6', // 主要紫色
-                600: '#7C3AED',
-              },
-              
-              // Secondary: Soft Pink/Rose（用于"小确幸"图标和文字）
-              pink: {
-                50: '#FDF2F8',
-                100: '#FCE7F3', // 用于"小确幸"背景
-                200: '#FBCFE8',
-                300: '#F9A8D4',
-                400: '#F472B6',
-                500: '#EC4899', // 用于"小确幸"文字
-              },
+      // 配置 Tailwind（在 CDN 加载后立即设置）
+      function initTailwindConfig() {
+        if (typeof tailwind === 'undefined') {
+          // 如果 tailwind 还没加载，等待一下
+          setTimeout(initTailwindConfig, 50);
+          return;
+        }
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                // Background: 温暖的奶油色（匹配 Gemini 设计）
+                cream: '#FDFBF7', // 更暖的奶油色
+                surface: '#FFFFFF',
+                
+                // Primary: Lavender / Soft Purple
+                primary: {
+                  50: '#F5F3FF',
+                  100: '#EDE9FE',
+                  200: '#DDD6FE',
+                  300: '#C4B5FD',
+                  400: '#A78BFA',
+                  500: '#8B5CF6',
+                  600: '#7C3AED',
+                },
+                
+                // Secondary: Soft Pink/Rose
+                pink: {
+                  50: '#FDF2F8',
+                  100: '#FCE7F3',
+                  200: '#FBCFE8',
+                  300: '#F9A8D4',
+                  400: '#F472B6',
+                },
 
-              // Soft Mint（用于背景渐变）
-              mint: {
-                50: '#F0FDFA',
-                100: '#CCFBF1',
-                200: '#99F6E4',
-                500: '#14B8A6',
-                600: '#0D9488',
+                // Soft Mint
+                mint: {
+                  50: '#F0FDFA',
+                  100: '#CCFBF1',
+                  200: '#99F6E4',
+                  500: '#14B8A6',
+                  600: '#0D9488',
+                },
+                
+                // Peach/Orange（用于能量消耗）
+                peach: {
+                  50: '#FFF5ED',
+                  100: '#FFE4D6',
+                  200: '#FFD4B8',
+                  500: '#FF8C69',
+                  600: '#FF6B3D',
+                },
+                
+                // Orange（用于火焰图标和高光时刻）
+                orange: {
+                  50: '#FFF7ED',
+                  100: '#FFEDD5',
+                  200: '#FED7AA',
+                  400: '#FB923C',
+                  500: '#F97316',
+                },
+                
+                // Red（用于高能量消耗）
+                red: {
+                  50: '#FEF2F2',
+                  100: '#FEE2E2',
+                  200: '#FECACA',
+                  500: '#EF4444',
+                  600: '#DC2626',
+                },
+                
+                // Green（用于已完成任务）
+                green: {
+                  50: '#F0FDF4',
+                  100: '#DCFCE7',
+                  200: '#BBF7D0',
+                  500: '#22C55E',
+                  600: '#16A34A',
+                },
+                
+                // Indigo（用于 MIT 步骤）
+                indigo: {
+                  50: '#EEF2FF',
+                  100: '#E0E7FF',
+                  200: '#C7D2FE',
+                  300: '#A5B4FC',
+                  600: '#4F46E5',
+                },
+                
+                // Purple（用于明日步骤）
+                purple: {
+                  50: '#FAF5FF',
+                  100: '#F3E8FF',
+                  200: '#E9D5FF',
+                  300: '#D8B4FE',
+                  600: '#9333EA',
+                },
+                
+                // Green（用于已完成任务）
+                green: {
+                  50: '#F0FDF4',
+                  100: '#DCFCE7',
+                  200: '#BBF7D0',
+                  500: '#22C55E',
+                  600: '#16A34A',
+                },
+                
+                // Text
+                ink: {
+                  300: '#D1D5DB',
+                  400: '#9CA3AF',
+                  500: '#6B7280',
+                  600: '#4B5563',
+                  700: '#374151',
+                  800: '#1F2937',
+                  900: '#111827',
+                }
               },
-              
-              // Peach/Orange（用于能量消耗）
-              peach: {
-                50: '#FFF5ED',
-                100: '#FFE4D6',
-                200: '#FFD4B8',
-                500: '#FF8C69',
-                600: '#FF6B3D',
+              fontFamily: {
+                sans: ['"Nunito"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                serif: ['"Noto Serif SC"', '"Songti SC"', 'serif'],
               },
-              
-              // Orange（用于火焰图标和高光时刻）
-              orange: {
-                50: '#FFF7ED',
-                100: '#FFEDD5', // 用于火焰图标背景
-                200: '#FED7AA',
-                400: '#FB923C',
-                500: '#F97316', // 用于火焰图标
+              boxShadow: {
+                'soft': '0 10px 40px -10px rgba(139, 92, 246, 0.1)',
+                'card': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
+                'glow': '0 0 25px rgba(167, 139, 250, 0.4)',
               },
-              
-              // Red（用于高能量消耗）
-              red: {
-                50: '#FEF2F2',
-                100: '#FEE2E2',
-                200: '#FECACA',
-                500: '#EF4444',
-                600: '#DC2626',
+              animation: {
+                'breathe': 'breathe 8s ease-in-out infinite',
+                'float': 'float 6s ease-in-out infinite',
+                'fade-in': 'fadeIn 1s ease-out forwards',
               },
-              
-              // Indigo（用于 MIT 步骤）
-              indigo: {
-                50: '#EEF2FF',
-                100: '#E0E7FF',
-                200: '#C7D2FE',
-                300: '#A5B4FC',
-                600: '#4F46E5',
-              },
-              
-              // Purple（用于明日步骤）
-              purple: {
-                50: '#FAF5FF',
-                100: '#F3E8FF',
-                200: '#E9D5FF',
-                300: '#D8B4FE',
-                600: '#9333EA',
-              },
-              
-              // Green（用于已完成任务）
-              green: {
-                50: '#F0FDF4',
-                100: '#DCFCE7',
-                200: '#BBF7D0',
-                500: '#22C55E',
-                600: '#16A34A',
-              },
-              
-              // Text（深灰色用于主要文字，浅灰色用于次要文字）
-              ink: {
-                100: '#F3F4F6',
-                200: '#E5E7EB',
-                300: '#D1D5DB',
-                400: '#9CA3AF', // 次要文字（如日期、查看足迹）
-                500: '#6B7280',
-                600: '#4B5563',
-                700: '#374151', // 主要文字
-                800: '#1F2937',
-                900: '#111827', // 最深的文字
+              keyframes: {
+                breathe: {
+                  '0%, 100%': { transform: 'scale(1)', opacity: '0.4' },
+                  '50%': { transform: 'scale(1.05)', opacity: '0.6' },
+                },
+                float: {
+                  '0%, 100%': { transform: 'translateY(0)' },
+                  '50%': { transform: 'translateY(-10px)' },
+                },
+                fadeIn: {
+                  '0%': { opacity: '0', transform: 'translateY(20px)' },
+                  '100%': { opacity: '1', transform: 'translateY(0)' },
+                }
               }
             },
-            fontFamily: {
-              sans: ['"Nunito"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-              serif: ['"Noto Serif SC"', '"Songti SC"', 'serif'],
-            },
-            boxShadow: {
-              'soft': '0 10px 40px -10px rgba(139, 92, 246, 0.1)',
-              'card': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
-              'glow': '0 0 25px rgba(167, 139, 250, 0.4)',
-            },
-            animation: {
-              'breathe': 'breathe 8s ease-in-out infinite',
-              'float': 'float 6s ease-in-out infinite',
-              'fade-in': 'fadeIn 1s ease-out forwards',
-            },
-            keyframes: {
-              breathe: {
-                '0%, 100%': { transform: 'scale(1)', opacity: '0.4' },
-                '50%': { transform: 'scale(1.05)', opacity: '0.6' },
-              },
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-10px)' },
-              },
-              fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              }
-            }
           },
-        },
-      };
+        };
+        console.log('[Tailwind] 配置已应用');
+      }
+      // 备用方案：如果 onload 事件没有触发，在页面加载完成后尝试
+      window.addEventListener('load', function() {
+        if (typeof tailwind !== 'undefined' && !tailwind.config) {
+          initTailwindConfig();
+        }
+      });
     </script>
     <!-- Fonts: Nunito (Rounded Sans) & Noto Serif SC -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -162,7 +182,7 @@
     <style>
       body {
         -webkit-tap-highlight-color: transparent;
-        background-color: #FEFEFE; /* 几乎纯白，匹配设计图 */
+        background-color: #FDFBF7; /* 温暖的奶油色，匹配 Gemini 设计 */
         color: #1F2937;
         font-family: "Nunito", sans-serif;
       }
@@ -190,16 +210,17 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+<link rel="stylesheet" href="./index.css">
 </head>
   <body>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
   <!-- Service Worker Registration -->
   <script>
-    // 注册 Service Worker
+    // 注册 Service Worker（延迟注册，避免阻塞页面加载）
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      // 延迟注册，确保页面主要内容已加载
+      const registerSW = () => {
         navigator.serviceWorker.register('/service-worker.js')
           .then((registration) => {
             console.log('[PWA] Service Worker 注册成功:', registration.scope);
@@ -210,8 +231,8 @@
               if (newWorker) {
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // 有新版本可用，可以提示用户刷新
-                    console.log('[PWA] 新版本可用，请刷新页面');
+                    console.log('[PWA] 新版本可用');
+                    // 可以在这里提示用户刷新页面
                   }
                 });
               }
@@ -220,12 +241,16 @@
           .catch((error) => {
             console.warn('[PWA] Service Worker 注册失败:', error);
           });
-      });
+      };
       
-      // 监听 Service Worker 消息
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        console.log('[PWA] 收到 Service Worker 消息:', event.data);
-      });
+      // 页面加载完成后注册（移动端延迟更久）
+      if (document.readyState === 'complete') {
+        setTimeout(registerSW, 1000);
+      } else {
+        window.addEventListener('load', () => {
+          setTimeout(registerSW, 1000);
+        });
+      }
     }
   </script>
 </body>

@@ -5,17 +5,34 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #FEFEFE;
+  color: #1F2937;
 }
 
 #root {
   width: 100%;
   height: 100vh;
   overflow: hidden;
+}
+
+/* 确保 Tailwind 自定义颜色可用 */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.leading-relaxed {
+  line-height: 1.75;
 }
 
 
